@@ -55,6 +55,9 @@ public class LobbySceneManager : MonoBehaviour {
             string roomName = (string) item.GetValue("config").ToObject<JObject>().GetValue("name");
 
             RoomItem roomItem = Instantiate(roomItemOrigin.gameObject).GetComponent<RoomItem>();
+            roomItem.SetRoomItemEvent(delegate {
+                RequestEnterRoom(roomId);
+            });
             roomItem.SetRoomId(roomId);
             roomItem.SetRoomName(roomName);
             roomItem.AppendTo(roomListViewContent.gameObject, number);
@@ -84,6 +87,16 @@ public class LobbySceneManager : MonoBehaviour {
     private void RequestRoomList() {
         JObject jobj = new JObject();
         jobj.Add("request", "ask room list");
+
+        SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
+    }
+
+    private void RequestEnterRoom(int roomId) {
+        Debug.Log("Request Enter Room" + roomId);
+
+        JObject jobj = new JObject();
+        jobj.Add("request", "enter room");
+        jobj.Add("roomId", roomId);
 
         SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
     }
@@ -143,6 +156,12 @@ public class LobbySceneManager : MonoBehaviour {
                 JArray jarr = (JArray) jobj.GetValue("roomList");
 
                 lobbySceneManager.RefreshRoomListView(jarr);
+            } else if (request.Equals("enter room")) {
+                string result = jobj.GetValue("result").ToString();
+
+                if (result.Equals("successed")) {
+                    SceneManager.LoadScene("RoomScene");
+                }
             }
         }
 

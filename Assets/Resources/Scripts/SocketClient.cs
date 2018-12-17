@@ -52,6 +52,7 @@ public class SocketClient {
     public IEnumerator DataReceiveCorutine() {
         int bufferSize = 0;
         while (true) {
+            
             if (isSocketConnected()) {
                 bufferSize = socket.Available;
                 if (bufferSize > 0) {

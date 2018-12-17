@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class RoomItem : MonoBehaviour {
 
+    public delegate void ClickEvent();
+
+    private ClickEvent clickEvent = null;
+
     public Text roomIdView;
     public Text roomNameView;
 
@@ -18,6 +22,10 @@ public class RoomItem : MonoBehaviour {
     
     void Update() {
         
+    }
+
+    public void SetRoomItemEvent(ClickEvent e) {
+        clickEvent = e;
     }
 
     public void AppendTo(GameObject obj, int number) {
@@ -37,5 +45,8 @@ public class RoomItem : MonoBehaviour {
 
     public void OnClicked() {
         Debug.Log("id" + roomId);
+        clickEvent();
     }
+
+
 }

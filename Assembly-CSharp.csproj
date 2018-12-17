@@ -57,9 +57,11 @@
      <Compile Include="Assets\Resources\Scripts\Game\DataManager\UserManager.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\LobbySceneManager.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\RoomCreateSceneManager.cs" />
+     <Compile Include="Assets\Resources\Scripts\Game\RoomSceneManager.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\SharedArea.cs" />
      <Compile Include="Assets\Resources\Scripts\Login\LoginSceneManager.cs" />
      <Compile Include="Assets\Resources\Scripts\SocketClient.cs" />
+     <Compile Include="Assets\Resources\Scripts\Widget\MemberItem.cs" />
      <Compile Include="Assets\Resources\Scripts\Widget\RoomItem.cs" />
      <None Include="Assets\link.xml" />
  <Reference Include="Unity.TextMeshPro.Editor">
