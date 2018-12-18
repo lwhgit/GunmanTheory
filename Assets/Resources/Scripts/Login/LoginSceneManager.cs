@@ -11,7 +11,8 @@ public class LoginSceneManager : MonoBehaviour {
 
     public InputField nicknameInput;
     public Button loginButotn;
-    public Text responseView;
+    public Button reconncetionButton;
+    public TextView responseView;
 
     private SocketClient socketClient = null;
     private SocketEventHandler socketEventHandler = null;
@@ -21,16 +22,35 @@ public class LoginSceneManager : MonoBehaviour {
 
         socketClient = new SocketClient();
         socketClient.SetSocketEventListener(socketEventHandler);
-        socketClient.Connect(Config.SERVER_IP, Config.LOGIN_SERVER_PORT);
+        ConnectToServer();
+
         StartCoroutine(socketClient.DataReceiveCorutine());
 	}
 	
 	void Update () {
-		
-	}
 
-    public void OnLoginButtonClick() {
-        SendLoginNickname(nicknameInput.text);
+    }
+    
+    void OnApplicationQuit() {
+        SharedArea.socketClient.Disconnect();
+    }
+
+    private void ConnectToServer() {
+        socketClient.Connect(Config.SERVER_IP, Config.LOGIN_SERVER_PORT);
+    }
+
+    public void OnLoginButtonClicked() {
+        if (nicknameInput.text.Length == 0) {
+            responseView.SetText("Please input nickname.");
+            responseView.ShakeText();
+        } else {
+            SendLoginNickname(nicknameInput.text);
+        }
+    }
+
+    public void OnReconncetionButtonClicked() {
+        reconncetionButton.gameObject.SetActive(false);
+        ConnectToServer();
     }
 
     private void SendLoginNickname(string nickname) {
@@ -51,24 +71,35 @@ public class LoginSceneManager : MonoBehaviour {
 
         public void OnConnected() {
             Debug.Log("Connected.");
+            loginSceneManager.responseView.SetText("");
+            loginSceneManager.loginButotn.interactable = true;
         }
 
         public void OnConnectionFailed() {
             Debug.Log("Connection failed.");
+            loginSceneManager.responseView.SetText("Cannot connect to server.");
+            loginSceneManager.responseView.ShakeText();
+            loginSceneManager.reconncetionButton.gameObject.SetActive(true);
+            loginSceneManager.loginButotn.interactable = false;
         }
 
         public void OnData(byte[] buffer) {
-
             string msg = Encoding.UTF8.GetString(buffer);
+
+            Debug.Log(msg);
+
             JObject jobj = JObject.Parse(msg);
 
             string request = jobj.GetValue("request").ToString();
 
             if (request.Equals("register")) {
+                Debug.Log("flag1");
                 string result = jobj.GetValue("result").ToString();
 
                 if (result.Equals("successed")) {
-                    loginSceneManager.responseView.text = "Successed.";
+                    Debug.Log("flag2");
+
+                    loginSceneManager.responseView.SetText("Successed.");
 
                     Config.id = (int) jobj.GetValue("id");
                     Config.nickname = jobj.GetValue("nickname").ToString();
@@ -78,7 +109,8 @@ public class LoginSceneManager : MonoBehaviour {
                     SceneManager.LoadScene("LobbyScene");
                 } else if (result.Equals("failed")) {
                     string message = jobj.GetValue("message").ToString();
-                    loginSceneManager.responseView.text = message;
+                    loginSceneManager.responseView.SetText(message);
+                    loginSceneManager.responseView.ShakeText();
                 }
             }
         }

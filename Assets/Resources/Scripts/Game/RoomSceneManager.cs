@@ -27,6 +27,10 @@ public class RoomSceneManager : MonoBehaviour {
 
     }
 
+    void OnApplicationQuit() {
+        SharedArea.socketClient.Disconnect();
+    }
+
     private void RefreshMemberListView(JArray jarr) {
         List<JObject> items = jarr.ToObject<List<JObject>>();
 
@@ -41,7 +45,7 @@ public class RoomSceneManager : MonoBehaviour {
                 memberItem.SetNumberView(i + 1);
                 memberItem.SetNicknameView(authNickname);
             } else {
-                
+                memberItem.SetEmptyState();
             }
         }
     }
@@ -88,6 +92,8 @@ public class RoomSceneManager : MonoBehaviour {
                     roomSceneManager.RefreshMemberListView(jarr);
                 }
             } else if (request.Equals("member entered")) {
+                roomSceneManager.RequestRoomMemberList();
+            } else if (request.Equals("member left")) {
                 roomSceneManager.RequestRoomMemberList();
             }
         }

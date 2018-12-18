@@ -34,6 +34,10 @@ public class RoomCreateSceneManager : MonoBehaviour {
 
     }
 
+    void OnApplicationQuit() {
+        SharedArea.socketClient.Disconnect();
+    }
+
     private void RequestCreateRoom() {
         JObject jobj = new JObject();
         jobj.Add("request", "create room");

@@ -63,6 +63,7 @@
      <Compile Include="Assets\Resources\Scripts\SocketClient.cs" />
      <Compile Include="Assets\Resources\Scripts\Widget\MemberItem.cs" />
      <Compile Include="Assets\Resources\Scripts\Widget\RoomItem.cs" />
+     <Compile Include="Assets\Resources\Scripts\Widget\TextView.cs" />
      <None Include="Assets\link.xml" />
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>D:/workspace/Unity/GunmanTheory/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

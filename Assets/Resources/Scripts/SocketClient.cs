@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Collections;
@@ -11,9 +12,14 @@ using UnityEngine;
 public class SocketClient {
     private ISocketEventListener eventListener = null;
     private Socket socket = null;
+    private AsyncCallback dataReceiveHandler = null;
+
+    private Queue<byte[]> queueForReceive = null;
 
     public SocketClient() {
-        
+        dataReceiveHandler = new AsyncCallback(DataReceiveHandler);
+
+        queueForReceive = new Queue<byte[]>();
     }
 
     public void SetSocketEventListener(ISocketEventListener listener) {
@@ -27,6 +33,8 @@ public class SocketClient {
             if (eventListener != null) {
                 eventListener.OnConnected();
             }
+            
+            WaitForReceive();
         } catch (Exception) {
             if (eventListener != null) {
                 eventListener.OnConnectionFailed();
@@ -49,18 +57,38 @@ public class SocketClient {
         socket.Send(buffer);
     }
 
+    private void WaitForReceive() {
+        AsyncObject ao = new AsyncObject(4096);
+        socket.BeginReceive(ao.buffer, 0, ao.buffer.Length, SocketFlags.None, dataReceiveHandler, ao);
+    }
+
+    private void DataReceiveHandler(IAsyncResult asyncResult) {
+        try {
+            AsyncObject ao = (AsyncObject) asyncResult.AsyncState;
+
+            int length = socket.EndReceive(asyncResult);
+
+            if (length > 0) {
+                byte[] buffer = new byte[length];
+                Array.Copy(ao.buffer, buffer, length);
+
+                queueForReceive.Enqueue(buffer);
+                
+            }
+
+            WaitForReceive();
+        } catch (Exception) {
+
+        }
+    }
+
     public IEnumerator DataReceiveCorutine() {
-        int bufferSize = 0;
         while (true) {
-            
-            if (isSocketConnected()) {
-                bufferSize = socket.Available;
-                if (bufferSize > 0) {
-                    byte[] buffer = new byte[bufferSize];
-                    socket.Receive(buffer);
-                    if (eventListener != null) {
-                        eventListener.OnData(buffer);
-                    }
+            if (queueForReceive.Count > 0) {
+                byte[] buffer = queueForReceive.Dequeue();
+                
+                if (eventListener != null) {
+                    eventListener.OnData(buffer);
                 }
             }
             yield return new WaitForSeconds(0.05f);
@@ -72,5 +100,13 @@ public class SocketClient {
         void OnConnectionFailed();
         void OnDisconnected();
         void OnData(byte[] buffer);
+    }
+
+    private class AsyncObject {
+        public byte[] buffer = null;
+
+        public AsyncObject(int bufferSize) {
+            buffer = new byte[bufferSize];
+        }
     }
 }

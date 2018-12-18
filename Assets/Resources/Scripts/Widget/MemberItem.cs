@@ -15,4 +15,9 @@ public class MemberItem : MonoBehaviour {
     public void SetNicknameView(string nickname) {
         nicknameView.text = nickname;
     }
+
+    public void SetEmptyState() {
+        numberView.text = "No.X";
+        nicknameView.text = ".";
+    }
 }

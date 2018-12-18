@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 using Newtonsoft.Json.Linq;
@@ -10,6 +11,8 @@ public class LobbySceneManager : MonoBehaviour {
 
     public RectTransform roomListViewContent;
     public RoomItem roomItemOrigin;
+
+    public Text responseView;
     
     private SocketEventHandler socketEventHandler = null;
 
@@ -46,6 +49,11 @@ public class LobbySceneManager : MonoBehaviour {
     }
 
     private void RefreshRoomListView(JArray jarr) {                                                     // 수정 좀 해야할것같이 생김
+
+        for (int i = 0;i < roomListViewContent.childCount;i ++) {
+            Destroy(roomListViewContent.GetChild(i).gameObject);
+        }
+
         int length = jarr.Count;
         roomListViewContent.sizeDelta = new Vector2(0, 240 * length + 80);
 
@@ -101,14 +109,12 @@ public class LobbySceneManager : MonoBehaviour {
         SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
     }
 
+    public void OnRoomRefreshButtonClicked() {
+        RequestRoomList();
+    }
+
     public void OnCreateRoomButtonClicked() {
         SceneManager.LoadScene("RoomCreateScene");
-        /*
-        JObject jobj = new JObject();
-        jobj.Add("request", "create room");
-
-        SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
-        */
     }
 
     private class SocketEventHandler : SocketClient.ISocketEventListener {
@@ -143,14 +149,14 @@ public class LobbySceneManager : MonoBehaviour {
                 if (result.Equals("successed")) {
                     Debug.Log("Login successed.");
                     SharedArea.isLoggedIn = true;
-                    lobbySceneManager.RequestUserList();                                        // 여기로 옮기면 오류남
-                } else if (result.Equals("failed")) {                                           //
-                    string message = jobj.GetValue("message").ToString();                       //
-                    Debug.Log("Login failed. " + message);                                      //
-                }                                                                               //
-            } else if (request.Equals("ask user list")) {                                       //
-                JArray jarr = (JArray) jobj.GetValue("userList");                               //
-                lobbySceneManager.RequestRoomList();                                            // 이거를
+                    lobbySceneManager.RequestUserList();
+                    lobbySceneManager.RequestRoomList();
+                } else if (result.Equals("failed")) {
+                    string message = jobj.GetValue("message").ToString();
+                    Debug.Log("Login failed. " + message);
+                }
+            } else if (request.Equals("ask user list")) {
+                JArray jarr = (JArray) jobj.GetValue("userList");
 
             } else if (request.Equals("ask room list")) {
                 JArray jarr = (JArray) jobj.GetValue("roomList");
@@ -161,6 +167,8 @@ public class LobbySceneManager : MonoBehaviour {
 
                 if (result.Equals("successed")) {
                     SceneManager.LoadScene("RoomScene");
+                } else if (result.Equals("failed")) {
+                    lobbySceneManager.responseView.text = jobj.GetValue("message").ToString();
                 }
             }
         }
