@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 using Newtonsoft.Json.Linq;
 
@@ -57,6 +58,17 @@ public class RoomSceneManager : MonoBehaviour {
         SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
     }
 
+    private void RequestRoomLeave() {
+        JObject jobj = new JObject();
+        jobj.Add("request", "leave room");
+
+        SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
+    }
+
+    public void OnLeaveButtonClicked() {
+        RequestRoomLeave();
+    }
+
     private class SocketEventHandler : SocketClient.ISocketEventListener {
 
         private RoomSceneManager roomSceneManager = null;
@@ -95,6 +107,8 @@ public class RoomSceneManager : MonoBehaviour {
                 roomSceneManager.RequestRoomMemberList();
             } else if (request.Equals("member left")) {
                 roomSceneManager.RequestRoomMemberList();
+            } else if (request.Equals("leave room")) {
+                SceneManager.LoadScene("LobbyScene");
             }
         }
 

@@ -17,6 +17,8 @@ public class LobbySceneManager : MonoBehaviour {
     private SocketEventHandler socketEventHandler = null;
 
     void Start () {
+        Debug.Log("das");
+
         socketEventHandler = new SocketEventHandler(this);
 
         if (Config.id != -1 && !SharedArea.isLoggedIn) {
@@ -29,14 +31,13 @@ public class LobbySceneManager : MonoBehaviour {
             LoginToGameServer();
 
             Config.userManager = new UserManager();
-        }
-
-        if (SharedArea.isLoggedIn) {
+        } else if (SharedArea.isLoggedIn) {
             
             SharedArea.socketClient.SetSocketEventListener(socketEventHandler);
             StartCoroutine(SharedArea.socketClient.DataReceiveCorutine());
 
             RequestUserList();
+            RequestRoomList();
         }
     }
 	
