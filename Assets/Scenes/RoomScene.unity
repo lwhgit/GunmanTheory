@@ -1676,6 +1676,8 @@ MonoBehaviour:
   - {fileID: 1876990490}
   - {fileID: 781973977}
   - {fileID: 2051087546}
+  leaveButton: {fileID: 655512541}
+  startButton: {fileID: 1845090014}
 --- !u!1 &1845090012
 GameObject:
   m_ObjectHideFlags: 0

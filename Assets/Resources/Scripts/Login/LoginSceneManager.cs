@@ -13,7 +13,7 @@ public class LoginSceneManager : MonoBehaviour {
     public Button loginButotn;
     public Button reconncetionButton;
     public TextView responseView;
-
+    
     private SocketClient socketClient = null;
     private SocketEventHandler socketEventHandler = null;
 
@@ -25,6 +25,7 @@ public class LoginSceneManager : MonoBehaviour {
         ConnectToServer();
 
         StartCoroutine(socketClient.DataReceiveCorutine());
+        StartCoroutine(socketClient.DataSendCorutine());
 	}
 	
 	void Update () {
@@ -93,16 +94,14 @@ public class LoginSceneManager : MonoBehaviour {
             string request = jobj.GetValue("request").ToString();
 
             if (request.Equals("register")) {
-                Debug.Log("flag1");
                 string result = jobj.GetValue("result").ToString();
 
                 if (result.Equals("successed")) {
-                    Debug.Log("flag2");
 
                     loginSceneManager.responseView.SetText("Successed.");
 
-                    Config.id = (int) jobj.GetValue("id");
-                    Config.nickname = jobj.GetValue("nickname").ToString();
+                    SharedArea.id = (int) jobj.GetValue("id");
+                    SharedArea.nickname = jobj.GetValue("nickname").ToString();
 
                     loginSceneManager.socketClient.Disconnect();
 

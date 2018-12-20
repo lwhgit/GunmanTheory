@@ -14,11 +14,13 @@ public class SocketClient {
     private Socket socket = null;
     private AsyncCallback dataReceiveHandler = null;
 
+    private Queue<byte[]> queueForSend = null;
     private Queue<byte[]> queueForReceive = null;
 
     public SocketClient() {
         dataReceiveHandler = new AsyncCallback(DataReceiveHandler);
 
+        queueForSend = new Queue<byte[]>();
         queueForReceive = new Queue<byte[]>();
     }
 
@@ -54,7 +56,7 @@ public class SocketClient {
     }
 
     public void Send(byte[] buffer) {
-        socket.Send(buffer);
+        queueForSend.Enqueue(buffer);
     }
 
     private void WaitForReceive() {
@@ -79,6 +81,17 @@ public class SocketClient {
             WaitForReceive();
         } catch (Exception) {
 
+        }
+    }
+
+    public IEnumerator DataSendCorutine() {
+        while (true) {
+            if (queueForSend.Count > 0) {
+                byte[] buffer = queueForSend.Dequeue();
+
+                socket.Send(buffer);
+            }
+            yield return new WaitForSeconds(0.05f);
         }
     }
 

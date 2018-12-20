@@ -21,20 +21,20 @@ public class LobbySceneManager : MonoBehaviour {
 
         socketEventHandler = new SocketEventHandler(this);
 
-        if (Config.id != -1 && !SharedArea.isLoggedIn) {
-            Debug.Log("ID: " + Config.id + "\t\tNickname: " + Config.nickname);
+        if (SharedArea.id != -1 && !SharedArea.isLoggedIn) {
+            Debug.Log("ID: " + SharedArea.id + "\t\tNickname: " + SharedArea.nickname);
             SharedArea.socketClient = new SocketClient();
             SharedArea.socketClient.SetSocketEventListener(socketEventHandler);
             SharedArea.socketClient.Connect(Config.SERVER_IP, Config.GAME_SERVER_PORT);
             StartCoroutine(SharedArea.socketClient.DataReceiveCorutine());
+            StartCoroutine(SharedArea.socketClient.DataSendCorutine());
 
             LoginToGameServer();
-
-            Config.userManager = new UserManager();
         } else if (SharedArea.isLoggedIn) {
             
             SharedArea.socketClient.SetSocketEventListener(socketEventHandler);
             StartCoroutine(SharedArea.socketClient.DataReceiveCorutine());
+            StartCoroutine(SharedArea.socketClient.DataSendCorutine());
 
             RequestUserList();
             RequestRoomList();
@@ -80,8 +80,8 @@ public class LobbySceneManager : MonoBehaviour {
     private void LoginToGameServer() {
         JObject jobj = new JObject();
         jobj.Add("request", "login");
-        jobj.Add("id", Config.id);
-        jobj.Add("nickname", Config.nickname);
+        jobj.Add("id", SharedArea.id);
+        jobj.Add("nickname", SharedArea.nickname);
 
         SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
     }

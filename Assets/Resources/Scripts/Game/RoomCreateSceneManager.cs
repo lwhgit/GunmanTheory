@@ -25,6 +25,7 @@ public class RoomCreateSceneManager : MonoBehaviour {
 
             SharedArea.socketClient.SetSocketEventListener(socketEventHandler);
             StartCoroutine(SharedArea.socketClient.DataReceiveCorutine());
+            StartCoroutine(SharedArea.socketClient.DataSendCorutine());
         }
 
     }

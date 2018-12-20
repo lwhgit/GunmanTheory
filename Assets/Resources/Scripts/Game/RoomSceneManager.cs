@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 using Newtonsoft.Json.Linq;
@@ -12,14 +13,22 @@ public class RoomSceneManager : MonoBehaviour {
 
     public MemberItem[] memberItems;
 
+    public Button leaveButton;
+    public Button startButton;
+
     void Start() {
         if (SharedArea.isLoggedIn) {
             socketEventHandler = new SocketEventHandler(this);
 
             SharedArea.socketClient.SetSocketEventListener(socketEventHandler);
             StartCoroutine(SharedArea.socketClient.DataReceiveCorutine());
+            StartCoroutine(SharedArea.socketClient.DataSendCorutine());
 
+            RequestRoomChiefData();     // 방 입장시 꼬임, 생성은 정상
+            //yield return new WaitForSeconds(1);
             RequestRoomMemberList();
+
+            //StartCoroutine(TmpCorutine());
         }
     }
     
@@ -30,6 +39,14 @@ public class RoomSceneManager : MonoBehaviour {
 
     void OnApplicationQuit() {
         SharedArea.socketClient.Disconnect();
+    }
+
+    private void HandleChiefPermission(int authId) {                      //함수 이름 마음에 안듦
+        if (authId == SharedArea.id) {
+            startButton.interactable = true;
+        } else {
+            startButton.interactable = false;
+        }
     }
 
     private void RefreshMemberListView(JArray jarr) {
@@ -49,6 +66,14 @@ public class RoomSceneManager : MonoBehaviour {
                 memberItem.SetEmptyState();
             }
         }
+    }
+
+    private void RequestRoomChiefData() {
+        JObject jobj = new JObject();
+        jobj.Add("request", "ask room chief data");
+        
+        
+        SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
     }
 
     private void RequestRoomMemberList() {
@@ -95,12 +120,21 @@ public class RoomSceneManager : MonoBehaviour {
 
             string request = jobj.GetValue("request").ToString();
 
-            if (request.Equals("ask room member list")) {
+            if (request.Equals("ask room chief data")) {
+                string result = jobj.GetValue("result").ToString();
+
+                if (result.Equals("successed")) {
+                    JObject chief = (JObject) jobj.GetValue("chief");
+                    int chiefAuthId = (int) chief.GetValue("authId");
+
+                    roomSceneManager.HandleChiefPermission(chiefAuthId);
+                }
+
+            } else if (request.Equals("ask room member list")) {
                 string result = jobj.GetValue("result").ToString();
 
                 if (result.Equals("successed")) {
                     JArray jarr = (JArray) jobj.GetValue("memberList");
-                    Debug.Log(jarr.ToString());
                     roomSceneManager.RefreshMemberListView(jarr);
                 }
             } else if (request.Equals("member entered")) {
@@ -109,6 +143,11 @@ public class RoomSceneManager : MonoBehaviour {
                 roomSceneManager.RequestRoomMemberList();
             } else if (request.Equals("leave room")) {
                 SceneManager.LoadScene("LobbyScene");
+            } else if (request.Equals("chief changed")) {
+                JObject chief = (JObject) jobj.GetValue("chief");
+                int chiefAuthId = (int) chief.GetValue("authId");
+
+                roomSceneManager.HandleChiefPermission(chiefAuthId);
             }
         }
 
