@@ -24,11 +24,8 @@ public class RoomSceneManager : MonoBehaviour {
             StartCoroutine(SharedArea.socketClient.DataReceiveCorutine());
             StartCoroutine(SharedArea.socketClient.DataSendCorutine());
 
-            RequestRoomChiefData();     // 방 입장시 꼬임, 생성은 정상
-            //yield return new WaitForSeconds(1);
+            RequestRoomChiefData();
             RequestRoomMemberList();
-
-            //StartCoroutine(TmpCorutine());
         }
     }
     
