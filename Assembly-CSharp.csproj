@@ -55,6 +55,7 @@
   <ItemGroup>
      <Compile Include="Assets\Resources\Scripts\Config.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\DataManager\UserManager.cs" />
+     <Compile Include="Assets\Resources\Scripts\Game\GameSceneManager.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\LobbySceneManager.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\RoomCreateSceneManager.cs" />
      <Compile Include="Assets\Resources\Scripts\Game\RoomSceneManager.cs" />

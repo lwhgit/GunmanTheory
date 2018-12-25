@@ -87,8 +87,19 @@ public class RoomSceneManager : MonoBehaviour {
         SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
     }
 
+    private void RequestGameStart() {
+        JObject jobj = new JObject();
+        jobj.Add("request", "game start");
+
+        SharedArea.socketClient.Send(Encoding.UTF8.GetBytes(jobj.ToString()));
+    }
+
     public void OnLeaveButtonClicked() {
         RequestRoomLeave();
+    }
+
+    public void OnStartButtonClicked() {
+        RequestGameStart();
     }
 
     private class SocketEventHandler : SocketClient.ISocketEventListener {
@@ -145,6 +156,8 @@ public class RoomSceneManager : MonoBehaviour {
                 int chiefAuthId = (int) chief.GetValue("authId");
 
                 roomSceneManager.HandleChiefPermission(chiefAuthId);
+            } else if (request.Equals("game start")) {
+                SceneManager.LoadScene("GameScene");
             }
         }
 
